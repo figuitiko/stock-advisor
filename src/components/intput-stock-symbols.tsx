@@ -11,6 +11,9 @@ export const InputStockSymbol = () => {
   const router = useRouter();
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!/^[A-Z]*$/i.test(event.target.value)) {
+      return;
+    }
     setSymbol(event.target.value.toUpperCase());
   };
 

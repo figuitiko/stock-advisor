@@ -7,6 +7,7 @@ import { mappingStockResult } from "@/utils/stock";
 import { SummaryInfo } from "@/components/summary-info";
 import { Separator } from "@/components/ui/separator";
 import { Suspense } from "react";
+import Loading from "./loading";
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
@@ -61,7 +62,7 @@ const Home = async (props: { searchParams: SearchParams }) => {
 
   return (
     <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start p-12">
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense key={symbol} fallback={<Loading />}>
         <div className="w-full flex flex-col gap-8  justify-center  ">
           <InputStockSymbol />
           <Separator />

@@ -52,7 +52,7 @@ export const analyzeStock = (stockData: StockDataType) => {
       dividendYield,
       debtEquityRatio,
       grahamValue,
-      dcfValue,
+      dcfValue: isNaN(dcfValue) ? 0 : dcfValue,
     },
   };
 };
