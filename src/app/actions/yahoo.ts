@@ -14,7 +14,7 @@ export const getStockSummary = async (symbol: string) => {
     if (!isValid) {
       return {
         error: true,
-        message: "Invalid symbol",
+        message: "Invalid symbol, not found",
       };
     }
 
