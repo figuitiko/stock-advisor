@@ -8,6 +8,7 @@ import { SummaryInfo } from "@/components/summary-info";
 import { Separator } from "@/components/ui/separator";
 import { Suspense } from "react";
 import Loading from "./loading";
+import { FramerTemplate } from "@/components/framer-template";
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
@@ -17,13 +18,15 @@ const Home = async (props: { searchParams: SearchParams }) => {
   if (!symbol || typeof symbol !== "string") {
     return (
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start p-12">
-        <div className="w-full flex flex-col gap-8  justify-center  ">
-          <InputStockSymbol />
-          <Separator />
-          <AlertAction heading="Not symbol" symbolSlot={<OctagonMinus />}>
-            Please enter a stock symbol
-          </AlertAction>
-        </div>
+        <FramerTemplate>
+          <div className="w-full flex flex-col gap-8  justify-center  ">
+            <InputStockSymbol />
+            <Separator />
+            <AlertAction heading="Not symbol" symbolSlot={<OctagonMinus />}>
+              Please enter a stock symbol
+            </AlertAction>
+          </div>
+        </FramerTemplate>
       </main>
     );
   }
@@ -31,13 +34,15 @@ const Home = async (props: { searchParams: SearchParams }) => {
   if (data.error) {
     return (
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start p-12">
-        <div className="w-full flex flex-col gap-8  justify-center  ">
-          <InputStockSymbol />
-          <Separator />
-          <AlertAction heading="Error fetching" symbolSlot={<OctagonMinus />}>
-            {data.message}
-          </AlertAction>
-        </div>
+        <FramerTemplate>
+          <div className="w-full flex flex-col gap-8  justify-center  ">
+            <InputStockSymbol />
+            <Separator />
+            <AlertAction heading="Error fetching" symbolSlot={<OctagonMinus />}>
+              {data.message}
+            </AlertAction>
+          </div>
+        </FramerTemplate>
       </main>
     );
   }
@@ -63,38 +68,43 @@ const Home = async (props: { searchParams: SearchParams }) => {
   return (
     <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start p-12">
       <Suspense key={symbol} fallback={<Loading />}>
-        <div className="w-full flex flex-col gap-8  justify-center  ">
-          <InputStockSymbol />
-          <Separator />
+        <FramerTemplate>
+          <div className="w-full flex flex-col gap-8  justify-center  ">
+            <InputStockSymbol />
+            <Separator />
 
-          <div>
-            {
-              <AlertAction heading="Stock Analysis" symbolSlot={<BadgeAlert />}>
-                {data.analysis?.recommendation}
-              </AlertAction>
-            }
+            <div>
+              {
+                <AlertAction
+                  heading="Stock Analysis"
+                  symbolSlot={<BadgeAlert />}
+                >
+                  {data.analysis?.recommendation}
+                </AlertAction>
+              }
+            </div>
+
+            <Separator />
+
+            <TableInfo
+              caption="Stock Summary"
+              headings={analysisHeading}
+              rows={[analysisRows]}
+            />
+            <Separator />
+
+            <TableInfo
+              caption="Stock Details"
+              headings={detailsHeading}
+              rows={[detailsRows]}
+            />
+            <Separator />
+
+            <SummaryInfo title="Summary Info" description="Stock Analysis">
+              {gptResponse}
+            </SummaryInfo>
           </div>
-
-          <Separator />
-
-          <TableInfo
-            caption="Stock Summary"
-            headings={analysisHeading}
-            rows={[analysisRows]}
-          />
-          <Separator />
-
-          <TableInfo
-            caption="Stock Details"
-            headings={detailsHeading}
-            rows={[detailsRows]}
-          />
-          <Separator />
-
-          <SummaryInfo title="Summary Info" description="Stock Analysis">
-            {gptResponse}
-          </SummaryInfo>
-        </div>
+        </FramerTemplate>
       </Suspense>
     </main>
   );
