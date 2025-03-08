@@ -42,7 +42,7 @@ const Home = async (props: { searchParams: SearchParams }) => {
   }
 
   const { analysis, gptResponse } = data;
-  console.log({ analysis });
+
   const { stock, score, recommendation, details } = analysis ?? {};
 
   const analysisHeading = Object.keys({ stock, score, recommendation }).map(

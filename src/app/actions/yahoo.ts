@@ -10,13 +10,21 @@ import { gptProcessData } from "./openAi";
 
 export const getStockSummary = async (symbol: string) => {
   try {
+    const isValid = await isValidSymbol(symbol);
+    if (!isValid) {
+      return {
+        error: true,
+        message: "Invalid symbol",
+      };
+    }
+
     const data = await yahooFinance.quoteSummary(symbol, {
       modules: ["financialData", "summaryDetail"],
     });
     if (!data || !data.financialData || !data.summaryDetail) {
       return {
         error: true,
-        message: "Error fetching data",
+        message: "Error fetching financial data",
       };
     }
 
@@ -57,7 +65,7 @@ export const getStockSummary = async (symbol: string) => {
       discountedCashFlows: discountedCashFlows,
       symbol,
     };
-    console.log({ mapData });
+
     const gptResponse = await gptProcessData(analyzeStock(mapData), symbol);
 
     return { analysis: analyzeStock(mapData), gptResponse };
@@ -66,5 +74,14 @@ export const getStockSummary = async (symbol: string) => {
       error: true,
       message: "Error fetching data",
     };
+  }
+};
+
+const isValidSymbol = async (symbol: string) => {
+  try {
+    const result = await yahooFinance.quote(symbol);
+    return result && result.symbol === symbol;
+  } catch {
+    return false;
   }
 };
