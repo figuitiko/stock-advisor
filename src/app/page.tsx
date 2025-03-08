@@ -6,18 +6,14 @@ import { TableInfo } from "@/components/table-info";
 import { mappingStockResult } from "@/utils/stock";
 import { SummaryInfo } from "@/components/summary-info";
 import { Separator } from "@/components/ui/separator";
+import { Suspense } from "react";
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
-const symbolIcon = {
-  HOLD: <OctagonMinus />,
-  BUY: <OctagonMinus />,
-  SELL: <OctagonMinus />,
-} as const;
 
 const Home = async (props: { searchParams: SearchParams }) => {
   const searchParams = await props.searchParams;
   const { symbol } = searchParams;
-  if (!symbol && typeof symbol !== "string") {
+  if (!symbol || typeof symbol !== "string") {
     return (
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start p-12">
         <div className="w-full flex flex-col gap-8  justify-center  ">
@@ -30,10 +26,23 @@ const Home = async (props: { searchParams: SearchParams }) => {
       </main>
     );
   }
-
   const data = await getStockSummary(symbol.toString().trim());
+  if (data.error) {
+    return (
+      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start p-12">
+        <div className="w-full flex flex-col gap-8  justify-center  ">
+          <InputStockSymbol />
+          <Separator />
+          <AlertAction heading="Error fetching" symbolSlot={<OctagonMinus />}>
+            {data.message}
+          </AlertAction>
+        </div>
+      </main>
+    );
+  }
 
   const { analysis, gptResponse } = data;
+  console.log({ analysis });
   const { stock, score, recommendation, details } = analysis ?? {};
 
   const analysisHeading = Object.keys({ stock, score, recommendation }).map(
@@ -52,19 +61,11 @@ const Home = async (props: { searchParams: SearchParams }) => {
 
   return (
     <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start p-12">
-      <div className="w-full flex flex-col gap-8  justify-center  ">
-        <InputStockSymbol />
-        <Separator />
-        {data.error ? (
-          <AlertAction
-            heading="Error"
-            symbolSlot={
-              symbolIcon[(symbol as keyof typeof symbolIcon) ?? "SELL"]
-            }
-          >
-            {data.message}
-          </AlertAction>
-        ) : (
+      <Suspense fallback={<div>Loading...</div>}>
+        <div className="w-full flex flex-col gap-8  justify-center  ">
+          <InputStockSymbol />
+          <Separator />
+
           <div>
             {
               <AlertAction heading="Stock Analysis" symbolSlot={<BadgeAlert />}>
@@ -72,27 +73,28 @@ const Home = async (props: { searchParams: SearchParams }) => {
               </AlertAction>
             }
           </div>
-        )}
-        <Separator />
 
-        <TableInfo
-          caption="Stock Summary"
-          headings={analysisHeading}
-          rows={[analysisRows]}
-        />
-        <Separator />
+          <Separator />
 
-        <TableInfo
-          caption="Stock Details"
-          headings={detailsHeading}
-          rows={[detailsRows]}
-        />
-        <Separator />
+          <TableInfo
+            caption="Stock Summary"
+            headings={analysisHeading}
+            rows={[analysisRows]}
+          />
+          <Separator />
 
-        <SummaryInfo title="Summary Info" description="Stock Analysis">
-          {gptResponse}
-        </SummaryInfo>
-      </div>
+          <TableInfo
+            caption="Stock Details"
+            headings={detailsHeading}
+            rows={[detailsRows]}
+          />
+          <Separator />
+
+          <SummaryInfo title="Summary Info" description="Stock Analysis">
+            {gptResponse}
+          </SummaryInfo>
+        </div>
+      </Suspense>
     </main>
   );
 };

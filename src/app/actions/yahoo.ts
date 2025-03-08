@@ -13,6 +13,12 @@ export const getStockSummary = async (symbol: string) => {
     const data = await yahooFinance.quoteSummary(symbol, {
       modules: ["financialData", "summaryDetail"],
     });
+    if (!data || !data.financialData || !data.summaryDetail) {
+      return {
+        error: true,
+        message: "Error fetching data",
+      };
+    }
 
     const eps =
       Math.floor(
@@ -51,6 +57,7 @@ export const getStockSummary = async (symbol: string) => {
       discountedCashFlows: discountedCashFlows,
       symbol,
     };
+    console.log({ mapData });
     const gptResponse = await gptProcessData(analyzeStock(mapData), symbol);
 
     return { analysis: analyzeStock(mapData), gptResponse };
